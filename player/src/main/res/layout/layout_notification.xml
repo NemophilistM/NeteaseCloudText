@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="100dp">
+
+    <ImageView
+        android:id="@+id/iv_pic_album"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        tools:ignore="ContentDescription" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0.3dp"
+        android:background="@color/grey"
+        android:layout_alignParentBottom="true"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0.3dp"
+        android:background="@color/grey"
+        android:layout_alignParentTop="true"/>
+
+    <TextView
+        android:id="@+id/tv_notification_song_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_toEndOf="@+id/iv_pic_album"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        tools:ignore="RelativeOverlap" />
+
+    <TextView
+        android:id="@+id/tv_notification_song_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_notification_song_name"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="3dp"
+        android:layout_toEndOf="@+id/iv_pic_album"
+        android:maxLines="1"
+        android:textColor="@color/grey"
+        android:textSize="14sp" />
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:id="@+id/iv_clear"
+        tools:ignore="ContentDescription" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0.3dp"
+        android:background="@color/grey"
+        android:layout_below="@+id/tv_notification_song_author"
+        android:layout_toEndOf="@+id/iv_pic_album"/>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tv_notification_song_author"
+        android:layout_toEndOf="@+id/iv_pic_album"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/iv_last_song_notification"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp" />
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/iv_pause_notification"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"/>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/iv_next_song_notification"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp" />
+    </LinearLayout>
+
+
+
+</RelativeLayout>

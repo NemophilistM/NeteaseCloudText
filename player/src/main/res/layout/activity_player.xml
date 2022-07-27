@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PlayerActivity">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tb_player"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+    </androidx.appcompat.widget.Toolbar>
+<ImageView
+    android:layout_width="match_parent"
+    android:layout_height="500dp"
+    android:layout_centerHorizontal="true"
+    android:layout_marginEnd="100dp"
+    android:layout_marginTop="30dp"
+    android:id="@+id/iv_picture"
+    tools:ignore="ContentDescription">
+</ImageView>
+
+    <TextView
+        android:id="@+id/tv_song_name"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/iv_picture"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:maxLines="1"/>
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_toEndOf="@+id/tv_song_name"
+        android:layout_alignBottom="@+id/tv_song_name"
+        android:layout_marginStart="15dp"
+        android:id="@+id/iv_play_logic"
+        tools:ignore="ContentDescription" />
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_below="@+id/tv_song_name"
+        android:layout_marginTop="10dp"
+        android:id="@+id/sb_progress">
+    </SeekBar>
+
+    <RelativeLayout
+        android:id="@+id/show_controller"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sb_progress"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tv_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </TextView>
+
+        <TextView
+            android:id="@+id/tv_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            tools:ignore="RelativeOverlap">
+        </TextView>
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/show_controller"
+        android:layout_marginTop="30dp"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:id="@+id/iv_last_song"
+            tools:ignore="ContentDescription"
+            android:layout_marginStart="36dp"
+            android:layout_marginEnd="36dp">
+        </ImageView>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/iv_stop"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:layout_marginStart="36dp"
+            android:layout_marginEnd="36dp"
+            tools:ignore="ContentDescription">
+        </ImageView>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:id="@+id/iv_next_song"
+            android:layout_marginStart="36dp"
+            android:layout_marginEnd="36dp"
+            tools:ignore="ContentDescription">
+        </ImageView>
+
+    </LinearLayout>
+</RelativeLayout>

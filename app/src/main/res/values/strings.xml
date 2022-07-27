@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">NeteaseCloudMusicText</string>
+    <string name="search">搜索</string>
+    <string name="hot_search_list">热搜榜</string>
+    <string name="user_name_tips">用户名:</string>
+    <string name="gender_tips">性别:</string>
+    <string name="phone">手机号:</string>
+    <string name="captcha">验证码:</string>
+    <string name="send_captcha">发送验证码</string>
+    <string name="to_login">登录</string>
+    <string name="to_register">注册</string>
+    <string name="user_name">用户名</string>
+    <string name="password">密码</string>
+    <string name="remember_password">记住密码</string>
+    <string name="fix">设置</string>
+    <string name="exit_login">退出登录</string>
+    <string name="recent_browsing">最近浏览</string>
+    <string name="now_download_more">正在加载更多</string>
+    <string name="no_more">已经没有更多了</string>
+    <string name="author_tips">作者:</string>
+    <string name="singe_tips">单曲:</string>
+    <string name="album_tips">专辑名:</string>
+</resources>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.search.SearchActivity">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tb_search"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        >
+        <com.example.neteasecloudmusictext.widget.EditTextSearchWidget
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_widget_search"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="15dp">
+        </com.example.neteasecloudmusictext.widget.EditTextSearchWidget>
+
+    </androidx.appcompat.widget.Toolbar>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tb_search">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/hot_search_list"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:textColor="@color/teal_700"
+            android:id="@+id/tv_hot_song_list_tips">
+        </TextView>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_margin="20dp"
+            android:layout_below="@+id/tv_hot_song_list_tips"
+            android:background="@drawable/style_card_type"
+
+            android:padding="5dp">
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"/>
+            <com.example.neteasecloudmusictext.widget.FlowLayoutWidget
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:id="@+id/flow_layout_hot_song"
+                android:padding="15dp">
+            </com.example.neteasecloudmusictext.widget.FlowLayoutWidget>
+        </RelativeLayout>
+    </RelativeLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tb_search"
+        android:id="@+id/layout_search">
+    </FrameLayout>
+
+
+</RelativeLayout>
