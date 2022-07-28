@@ -44,7 +44,7 @@
         tools:ignore="ContentDescription" />
     <SeekBar
         android:layout_width="match_parent"
-        android:layout_height="5dp"
+        android:layout_height="24dp"
         android:layout_below="@+id/tv_song_name"
         android:layout_marginTop="10dp"
         android:id="@+id/sb_progress">

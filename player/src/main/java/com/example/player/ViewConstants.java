@@ -25,13 +25,34 @@ public class ViewConstants {
 
 
     //播放状态
+    /**
+     * 播放
+     */
     public static final int PLAYING = 0;
+    /**
+     * 暂停
+     */
     public static final int PAUSE = 1;
+    /**
+     * 重新播放
+     */
     public static final int RESTART_PLAYING = 3;
+    /**
+     * 继续播放（需要先暂停）
+     */
     public static final int CONTINUE = 2;
+    /**
+     * 准备播放器
+     */
     public static final int PREPARED = 4;
+    /**
+     * 跳转进度
+     */
     public static final int SEEK_TO = 5;
     public static final int STOP = 6;
+    /**
+     * 下一首歌
+     */
     public static final int NEXT_SONG = 7;
     public static final int NO_SONG = 8;
 
@@ -52,10 +73,16 @@ public class ViewConstants {
     public static final String ORDINARY_DESCRIPTION_NOTIFICATION = "A Normal Channel";
 
     //通知操作按钮主题
+    public static final String  MAIN_ACTIVITY_ACTION = "startActivity";
     public static final String  LAST_SONG_NOTIFICATION_ACTION = "previous";
     public static final String  PAUSE_SONG_NOTIFICATION_ACTION = "pause";
     public static final String  NEXT_SONG_NOTIFICATION_ACTION = "next";
-    public static final String  PLAY_SONG_NOTIFICATION_ACTION = "play";
+    public static final String  CLEAR_FOREGROUND_NOTIFICATION_ACTION = "clear";
+    public static final String  SONG_NOTIFICATION_INTENT_KEY = "type";
+    public static final int  LAST_SONG_NOTIFICATION_VALUE = 30001;
+    public static final int  PAUSE_SONG_NOTIFICATION_VALUE = 30002;
+
+    public static final int  NEXT_SONG_NOTIFICATION_VALUE = 30003;
 
     //播放逻辑
     public static final int  PLAY_REPEAT = 0;

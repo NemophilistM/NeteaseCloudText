@@ -7,17 +7,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -29,162 +24,239 @@ import com.example.player.view.PlayerViewModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import java.util.Random;
 
 public class PlayerActivity extends AppCompatActivity {
     private ActivityPlayerBinding binding;
+    //判断是否绑定服务，默认为非绑定
     private boolean isBind = false;
-    private  boolean isFirstInside = true;
-    public  boolean isPlaying = false;
+    //判断是否为第一次进入，默认为是
+    private boolean isFirstInside = true;
+    //判断是否正在播放，默认为否
+    public boolean isPlaying = false;
+    //服务链接类
     private ServiceConnection serviceConnection;
-    private PlayerService.MusicControl musicControl;
+    //vm层
     private PlayerViewModel playerViewModel;
+    //服务类
     private PlayerService playerService;
-    public static int songPosition = 0;
-    private Boolean isFirstSong = true;
-    public static List<Song> songList;
+    //    //静态类，用于记录页数
+//    private   int PlayerService.position = 0;
+    //歌曲列表，从跳转activity获取
+    public List<Song> songList;
+    //随机数，用于随机播放的逻辑
+    private Random random;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPlayerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        //建立用于申请url的线程池
         HttpUtil.buildThreadPool();
+        //初始化顶部栏
         initToolbar();
+
+        //获取传入的歌单列表和歌曲位置
         Intent intent = getIntent();
         Bundle bundle = intent.getBundleExtra(ViewConstants.SONG_LIST);
-        songList = (List<Song>) bundle.getSerializable(ViewConstants.SONG_LIST);
-        songPosition = intent.getIntExtra(ViewConstants.POSITION,0);
+        if (bundle == null) {
+            songList = PlayerService.list;
+        } else {
+            songList = (List<Song>) bundle.getSerializable(ViewConstants.SONG_LIST);
+            PlayerService.position = intent.getIntExtra(ViewConstants.POSITION, 0);
+        }
+
+
+        //建立与vm层的通信
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         //完成服务绑定
         init();
-        //播放逻辑的判断显示
-        if(PlayerService.play_logic == ViewConstants.PLAY_REPEAT){
+        //播放逻辑的判断显示(由于逻辑的版本号是存储在服务层的静态类，因此在进入播放时需要判断)
+        if (PlayerService.play_logic == ViewConstants.PLAY_REPEAT) {
             binding.ivPlayLogic.setImageResource(R.drawable.ic_player_repeat);
-        }else if(PlayerService.play_logic == ViewConstants.PLAY_REPEAT_ONCE){
+        } else if (PlayerService.play_logic == ViewConstants.PLAY_REPEAT_ONCE) {
             binding.ivPlayLogic.setImageResource(R.drawable.ic_player_repeatonce);
-        }else if(PlayerService.play_logic == ViewConstants.PLAY_SHUFFLE){
+        } else if (PlayerService.play_logic == ViewConstants.PLAY_SHUFFLE) {
             binding.ivPlayLogic.setImageResource(R.drawable.ic_player_shuffle);
         }
-        Picasso.with(this).load(songList.get(songPosition).getAlbum().getPicUrl()).into(binding.ivPicture);
-        binding.tvSongName.setText(songList.get(songPosition).getName());
+
+        //完成进入播放界面的ui更新
+        Picasso.with(this).load(songList.get(PlayerService.position).getAlbum().getPicUrl()).into(binding.ivPicture);
+        binding.tvSongName.setText(songList.get(PlayerService.position).getName());
         binding.ivLastSong.setImageResource(R.drawable.ic_last_song);
         binding.ivNextSong.setImageResource(R.drawable.ic_next_song);
         binding.ivStop.setImageResource(R.drawable.ic_stop);
 
 
+        // 对进度条位置的参数观察
         playerViewModel.currentPosition.observe(this, currentPosition -> {
-            if(currentPosition!=ViewConstants.SONG_END){
+            // 判断是否播放完毕
+            // 未播放完毕
+            if (currentPosition != ViewConstants.SONG_END) {
                 binding.sbProgress.setProgress(currentPosition);
                 String time = TimeUtil.time(currentPosition);
-                //显示当前歌曲已经播放的时间
+                // 显示当前歌曲已经播放的时间
                 binding.tvProgress.setText(time);
-            }else {
-                int play_logic = PlayerService.play_logic;
-                if(play_logic == ViewConstants.PLAY_REPEAT){
-                    songPosition++;
-                    if (songPosition <= (songList.size() - 1)) {
-                        Picasso.with(this).load(songList.get(songPosition).getAlbum().getPicUrl() + ViewConstants.PARAM).into(binding.ivPicture);
-                        binding.tvSongName.setText(songList.get(songPosition).getName());
-                        musicControl.nextSong(songPosition);
-                    } else {
-                        songPosition = 0;
-                        Picasso.with(this).load(songList.get(songPosition).getAlbum().getPicUrl() + ViewConstants.PARAM).into(binding.ivPicture);
-                        binding.tvSongName.setText(songList.get(songPosition).getName());
-                        musicControl.nextSong(songPosition);
-                    }
-                } else if(play_logic == ViewConstants.PLAY_REPEAT_ONCE){
-                    musicControl.nextSong(songPosition);
-                }else if(play_logic == ViewConstants.PLAY_SHUFFLE){
-
-                }
-
             }
-
+            // 播放完毕
+            else {
+                // 获取播放逻辑进行判断
+                int play_logic = PlayerService.play_logic;
+                // 播放逻辑：顺序播放
+                if (play_logic == ViewConstants.PLAY_REPEAT) {
+                    PlayerService.position++;
+                    if (PlayerService.position <= (songList.size() - 1)) {
+                        Picasso.with(this).load(songList.get(PlayerService.position).getAlbum().getPicUrl() + ViewConstants.PARAM).into(binding.ivPicture);
+                        binding.tvSongName.setText(songList.get(PlayerService.position).getName());
+                        playerService.nextSong();
+                    } else {
+                        PlayerService.position = 0;
+                        Picasso.with(this).load(songList.get(PlayerService.position).getAlbum().getPicUrl() + ViewConstants.PARAM).into(binding.ivPicture);
+                        binding.tvSongName.setText(songList.get(PlayerService.position).getName());
+                        playerService.nextSong();
+                    }
+                }
+                // 播放逻辑：单曲循环(此时的播放位置是没有发生改变的)
+                else if (play_logic == ViewConstants.PLAY_REPEAT_ONCE) {
+                    playerService.nextSong();
+                }
+                // 播放逻辑：随机播放
+                else if (play_logic == ViewConstants.PLAY_SHUFFLE) {
+                    if (random == null) {
+                        random = new Random();
+                    }
+                    // 判断此时的下一首随机播放存储列表是否为空(为空就代表不是先点击了上一首随机播放)
+                    if (PlayerService.nextRandomList.size() <= 1) {
+                        PlayerService.position = random.nextInt(songList.size());
+                        PlayerService.previousRandomList.add(PlayerService.position);
+                        judgeSongStatus();
+                    } else {
+                        PlayerService.position = PlayerService.nextRandomList.get(PlayerService.nextRandomList.size() - 1);
+                        PlayerService.nextRandomList.remove(PlayerService.nextRandomList.size() - 1);
+                        judgeSongStatus();
+                    }
+                }
+            }
         });
+        //对进度条总计的参数观察
         playerViewModel.duration.observe(this, duration -> {
             binding.sbProgress.setMax(duration);
             String time = TimeUtil.time(duration);
             binding.tvTotal.setText(time);
         });
-//        playerViewModel.musicUrl.observe(this, url -> {
-//            if(url.equals(ViewConstants.NULL)){
-//                if (isFirstSong) {
-//                    musicControl.play(ViewConstants.ID_SEARCH_PREFIX+songList.get(songPosition).getId(),songPosition);
-//                    isFirstSong = false;
-//                } else {
-//                    musicControl.nextSong(ViewConstants.ID_SEARCH_PREFIX+songList.get(songPosition).getId()+ViewConstants.ID_SEARCH_SUFFIX,songPosition);
-//                }
-//                Log.e(ViewConstants.TAG, "onCreate: 该歌曲为null");
-//            }else {
-//                if (isFirstSong) {
-//                    musicControl.play(url,songPosition);
-//                    isFirstSong = false;
-//                } else {
-//                    musicControl.nextSong(url,songPosition);
-//                }
-//            }
-//        });
-
         //点击事件
+        //播放暂停键的点击逻辑
         binding.ivStop.setOnClickListener(v -> {
+            //第一次进入，未播放
             if (isFirstInside && !isPlaying) {
                 isFirstInside = false;
                 isPlaying = true;
                 binding.ivStop.setImageResource(R.drawable.ic_continue);
                 //完成三层之间的通信
-                playerViewModel.play(playerService,songList);
+                playerViewModel.play(playerService, songList);
                 //准备播放器
-//                playerViewModel.getUrl(songList.get(songPosition).getId());
-                musicControl.play(songPosition);
-            } else if (!isFirstInside && !isPlaying) {
+                playerService.play();
+            }
+            // 不是第一次进入，未播放
+            else if (!isFirstInside && !isPlaying) {
                 isPlaying = true;
                 binding.ivStop.setImageResource(R.drawable.ic_continue);
-                musicControl.continuePlay();
-            } else if (!isFirstInside  && isPlaying) {
+                playerService.continuePlay();
+            }
+            // 不是第一次进入，播放
+            else if (!isFirstInside && isPlaying) {
                 isPlaying = false;
                 binding.ivStop.setImageResource(R.drawable.ic_stop);
-                musicControl.pausePlay();
+                playerService.pausePlay();
             }
         });
+
+        //下一首的点击逻辑
         binding.ivNextSong.setOnClickListener(v -> {
-            songPosition++;
-            int play_logic = PlayerService.play_logic;
-            if(play_logic ==ViewConstants.PLAY_REPEAT || play_logic == ViewConstants.PLAY_REPEAT_ONCE){
-                if (songPosition <= (songList.size() - 1)) {
-                    judgeSongStatus(songPosition);
-                }else {
-                    songPosition = 0;
-                    judgeSongStatus(songPosition);
-                }
-            } else if(play_logic == ViewConstants.PLAY_SHUFFLE){
+            // 首先将当前列表位置加一
+            PlayerService.position++;
 
-            }
-
-        });
-        binding.ivLastSong.setOnClickListener(v->{
-            songPosition--;
+            // 获取播放逻辑进行判断
             int play_logic = PlayerService.play_logic;
-            if(play_logic == ViewConstants.PLAY_REPEAT||play_logic == ViewConstants.PLAY_REPEAT_ONCE){
-                if (songPosition >= 0){
-                    judgeSongStatus(songPosition);
+            // 播放逻辑：顺序，单曲循环(这二者点击下一首都会跳转到列表下一首)
+            if (play_logic == ViewConstants.PLAY_REPEAT || play_logic == ViewConstants.PLAY_REPEAT_ONCE) {
+                //判断是否为最后一首
+                if (PlayerService.position <= (songList.size() - 1)) {
+                    judgeSongStatus();
                 } else {
-                    songPosition  = (songList.size()-1);
-                    judgeSongStatus(songPosition);
+                    PlayerService.position = 0;
+                    judgeSongStatus();
                 }
-            } else if(play_logic == ViewConstants.PLAY_SHUFFLE){
+            }
+            // 播放逻辑：随机播放
+            else if (play_logic == ViewConstants.PLAY_SHUFFLE) {
+                if (random == null) {
+                    random = new Random();
+                }
+                // 判断此时的下一首随机播放存储列表是否为空(为空就代表不是先点击了上一首随机播放)
+                if (PlayerService.nextRandomList.size() <= 1) {
+                    PlayerService.position = random.nextInt(songList.size());
+                    PlayerService.previousRandomList.add(PlayerService.position);
+                    judgeSongStatus();
+                } else {
+                    PlayerService.position = PlayerService.nextRandomList.get(PlayerService.nextRandomList.size() - 1);
+                    PlayerService.nextRandomList.remove(PlayerService.nextRandomList.size() - 1);
+                    judgeSongStatus();
+                }
 
             }
 
         });
-        binding.ivPlayLogic.setOnClickListener(v->{
-            if(PlayerService.play_logic == ViewConstants.PLAY_REPEAT){
+
+        // 上一首的点击逻辑
+        binding.ivLastSong.setOnClickListener(v -> {
+            //先让当前位置自减1
+            PlayerService.position--;
+            // 判断播放逻辑
+            int play_logic = PlayerService.play_logic;
+            // 播放逻辑：顺序，单曲循环
+            if (play_logic == ViewConstants.PLAY_REPEAT || play_logic == ViewConstants.PLAY_REPEAT_ONCE) {
+                if (PlayerService.position >= 0) {
+                    judgeSongStatus();
+                } else {
+                    PlayerService.position = (songList.size() - 1);
+                    judgeSongStatus();
+                }
+            }
+            // 播放逻辑：随机播放
+            else if (play_logic == ViewConstants.PLAY_SHUFFLE) {
+                if (random == null) {
+                    random = new Random();
+                }
+                // 判断此时的上一首随机播放存储列表是否为空
+                if (PlayerService.previousRandomList.size() <= 1) {
+                    PlayerService.position = random.nextInt(songList.size());
+                    judgeSongStatus();
+                    PlayerService.nextRandomList.add(PlayerService.position);
+                } else {
+                    PlayerService.position = PlayerService.previousRandomList.get(PlayerService.previousRandomList.size() - 1);
+                    PlayerService.previousRandomList.remove(PlayerService.previousRandomList.size() - 1);
+                    judgeSongStatus();
+                }
+            }
+
+        });
+
+        // 播放逻辑的点击事件
+        binding.ivPlayLogic.setOnClickListener(v -> {
+            if (PlayerService.play_logic == ViewConstants.PLAY_REPEAT) {
                 PlayerService.play_logic = ViewConstants.PLAY_REPEAT_ONCE;
                 binding.ivPlayLogic.setImageResource(R.drawable.ic_player_repeatonce);
-            } else if(PlayerService.play_logic == ViewConstants.PLAY_REPEAT_ONCE){
+            } else if (PlayerService.play_logic == ViewConstants.PLAY_REPEAT_ONCE) {
                 PlayerService.play_logic = ViewConstants.PLAY_SHUFFLE;
+                PlayerService.previousRandomList.add(PlayerService.position);
+                PlayerService.nextRandomList.add(PlayerService.position);
                 binding.ivPlayLogic.setImageResource(R.drawable.ic_player_shuffle);
-            } else if(PlayerService.play_logic == ViewConstants.PLAY_SHUFFLE){
+            } else if (PlayerService.play_logic == ViewConstants.PLAY_SHUFFLE) {
                 PlayerService.play_logic = ViewConstants.PLAY_REPEAT;
+                PlayerService.previousRandomList.clear();
+                PlayerService.nextRandomList.clear();
                 binding.ivPlayLogic.setImageResource(R.drawable.ic_player_repeat);
             }
         });
@@ -193,52 +265,51 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
 
             }
-
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 int progress = seekBar.getProgress();
-                musicControl.seekTo(progress);
+                playerService.seekTo(progress);
             }
         });
 
 
-
     }
 
-    private void judgeSongStatus(int songPosition) {
-            if (!isPlaying && isFirstInside) {
-                //第一次进入但没有播放
-                isFirstInside = false;
-                isPlaying = true;
-                binding.ivStop.setImageResource(R.drawable.ic_continue);
-                //完成三层之间的通信
-                playerViewModel.play(playerService, songList);
-                //准备播放器
-//                    playerViewModel.getUrl(songList.get(songPosition).getId());
-                musicControl.play(songPosition);
-            } else if (!isFirstInside && isPlaying) {
-                //不是第一次进入正在播放
-                Picasso.with(this).load(songList.get(songPosition).getAlbum().getPicUrl() + ViewConstants.PARAM).into(binding.ivPicture);
-                binding.tvSongName.setText(songList.get(songPosition).getName());
-//                    playerViewModel.getUrl(songList.get(songPosition).getId());
-                musicControl.nextSong(songPosition);
-            } else {
-                //不是第一次进入没有播放的
-                isPlaying = true;
-                binding.ivStop.setImageResource(R.drawable.ic_continue);
-                if (songPosition == songList.size() - 1) {
-                    Toast.makeText(this, "当前歌曲为播放列表最后一首，请及时添加", Toast.LENGTH_SHORT).show();
-                }
-                Picasso.with(this).load(songList.get(songPosition).getAlbum().getPicUrl() + ViewConstants.PARAM).into(binding.ivPicture);
-                binding.tvSongName.setText(songList.get(songPosition).getName());
-//                    playerViewModel.getUrl(songList.get(songPosition).getId());
-                musicControl.nextSong(songPosition);
+    /**
+     * 判断播放状态
+     */
+    private void judgeSongStatus() {
+        if (!isPlaying && isFirstInside) {
+            //第一次进入但没有播放
+            isFirstInside = false;
+            isPlaying = true;
+            binding.ivStop.setImageResource(R.drawable.ic_continue);
+            //完成三层之间的通信
+            playerViewModel.play(playerService, songList);
+            //准备播放器
+            playerService.play();
+        } else if (!isFirstInside && isPlaying) {
+            //不是第一次进入正在播放
+            Picasso.with(this).load(songList.get(PlayerService.position).getAlbum().getPicUrl() + ViewConstants.PARAM).into(binding.ivPicture);
+            binding.tvSongName.setText(songList.get(PlayerService.position).getName());
+//                    playerViewModel.getUrl(songList.get(PlayerService.position).getId());
+            playerService.nextSong();
+        } else {
+            //不是第一次进入没有播放的
+            isPlaying = true;
+            binding.ivStop.setImageResource(R.drawable.ic_continue);
+            if (PlayerService.position == songList.size() - 1) {
+                Toast.makeText(this, "当前歌曲为播放列表最后一首，请及时添加", Toast.LENGTH_SHORT).show();
             }
+            Picasso.with(this).load(songList.get(PlayerService.position).getAlbum().getPicUrl() + ViewConstants.PARAM).into(binding.ivPicture);
+            binding.tvSongName.setText(songList.get(PlayerService.position).getName());
+//                    playerViewModel.getUrl(songList.get(PlayerService.position).getId());
+            playerService.nextSong();
+        }
 
     }
 
@@ -269,9 +340,9 @@ public class PlayerActivity extends AppCompatActivity {
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                musicControl = (PlayerService.MusicControl) service;
                 playerService = ((PlayerService.MusicControl) service).getService();
             }
+
             @Override
             public void onServiceDisconnected(ComponentName name) {
 
@@ -363,7 +434,6 @@ public class PlayerActivity extends AppCompatActivity {
             unbindService(serviceConnection);
         }
     }
-
 
 
 }

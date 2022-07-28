@@ -47,34 +47,7 @@ public class SearchResultModel {
 
 
             });
-//        }else {
-//            List<Song> songs = Formatter.songLists(responseData);
-//            callBack.callBackWhetherTure(songs);
-//        }
 
-    }
-    public static void requestAllSong (String postWords, CallBack callback){
-        RequestBody requestBody = new FormBody.Builder()
-                .add(ViewConstants.KEY_WORD,postWords)
-                .build();
-        Request request = new Request.Builder()
-                .url(ViewConstants.PREFIX_URL + ViewConstants.CLOUD_SEARCH_SONG)
-                .post(requestBody)
-                .build();
-        HttpUtil.getThreadPoolExecutor().execute(()->{
-            Response response = null;
-            try {
-                response = HttpUtil.getOkHttpClient().newCall(request).execute();
-                assert response.body() != null;
-                responseData= response.body().string();
-                List<Song> songs = Formatter.songLists(responseData);
-                callback.callBackWhetherTure(songs);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-        });
     }
     public interface  CallBack{
         public void callBackWhetherTure(List<Song> songs);
