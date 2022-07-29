@@ -54,6 +54,10 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
         holder.remove.setOnClickListener(v->{
             callback.remove(position);
         });
+        holder.songName.setOnClickListener(v->{
+            PlayerService.position = position;
+            callback.change();
+        });
     }
 
     @Override
@@ -75,7 +79,7 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
 
     public interface Callback{
         void remove(int position);
-        void change(CallbackPosition callbackPosition);
+        void change();
     }
 
     public interface CallbackPosition{

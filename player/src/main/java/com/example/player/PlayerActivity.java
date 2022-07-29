@@ -60,6 +60,7 @@ public class PlayerActivity extends AppCompatActivity {
 
 
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,8 +142,11 @@ public class PlayerActivity extends AppCompatActivity {
             }
 
             @Override
-            public void change(PlayListAdapter.CallbackPosition callbackPosition) {
-
+            public void change() {
+                Picasso.with(PlayerActivity.this).load(songList.get(PlayerService.position).getAlbum().getPicUrl()+ ViewConstants.PARAM).placeholder(R.drawable.img_wait).error(R.drawable.img_404).into(binding.ivPicture);
+                binding.tvSongName.setText(songList.get(PlayerService.position).getName());
+                recyclerView.setVisibility(View.GONE);
+                playerService.nextSong();
             }
         });
         recyclerView.setAdapter(adapter);
@@ -221,6 +225,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         // 播放列表的显示逻辑
         binding.ivPlayList.setOnClickListener(v->{
+            adapter.notifyDataSetChanged();
             recyclerView.setVisibility(View.VISIBLE);
         });
 
@@ -243,7 +248,6 @@ public class PlayerActivity extends AppCompatActivity {
         binding.ivNextSong.setOnClickListener(v -> {
             // 首先将当前列表位置加一
             PlayerService.position++;
-
             // 获取播放逻辑进行判断
             int play_logic = PlayerService.play_logic;
             // 播放逻辑：顺序，单曲循环(这二者点击下一首都会跳转到列表下一首)
