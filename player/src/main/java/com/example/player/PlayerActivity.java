@@ -28,6 +28,7 @@ import com.example.player.util.TimeUtil;
 import com.example.player.view.PlayerViewModel;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -100,8 +101,7 @@ public class PlayerActivity extends AppCompatActivity {
         binding.ivNextSong.setImageResource(R.drawable.ic_next_song);
         binding.ivStop.setImageResource(R.drawable.ic_stop);
 
-        // 让背景不显示
-        binding.ivNoMoreSong.setVisibility(View.GONE);
+
 
         //播放列表的初始化
         recyclerView = binding.rvPlayList;
@@ -111,13 +111,20 @@ public class PlayerActivity extends AppCompatActivity {
             public void remove(int position) {
                 if(adapter!=null){
                     if(songList.size()==1){
-                        binding.ivNoMoreSong.setVisibility(View.VISIBLE);
-                        songList.remove(position);
-                        PlayerService.list.remove(position);
+                        Toast.makeText(PlayerActivity.this,"该曲目未列表的最后一首，无法移除",Toast.LENGTH_SHORT).show();
                     }else {
                         adapter.notifyItemRemoved(position);
                         songList.remove(position);
                         PlayerService.list.remove(position);
+                        if(PlayerService.randomList!=null){
+                            PlayerService.randomList.add(PlayerService.position);
+                            while (PlayerService.randomList.size() < songList.size()) {
+                                int random1 = random.nextInt(songList.size());
+                                if(!PlayerService.randomList.contains(random1)){
+                                    PlayerService.randomList.add(random1);
+                                }
+                            }
+                        }
                         adapter.notifyItemRangeChanged(0,adapter.getItemCount());
                         adapter.notifyDataSetChanged();
                         if(position<PlayerService.position){
@@ -385,10 +392,6 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            if(binding.ivNoMoreSong.getVisibility() == View.VISIBLE){
-                binding.ivNoMoreSong.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.GONE);
-            }else {
                 if(recyclerView.getVisibility() == View.VISIBLE){
                     recyclerView.setVisibility(View.GONE);
                 }else {
@@ -398,8 +401,6 @@ public class PlayerActivity extends AppCompatActivity {
                     finish();
                 }
             }
-
-        }
         return true;
     }
 
