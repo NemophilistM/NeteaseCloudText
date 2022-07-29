@@ -100,6 +100,9 @@ public class PlayerActivity extends AppCompatActivity {
         binding.ivNextSong.setImageResource(R.drawable.ic_next_song);
         binding.ivStop.setImageResource(R.drawable.ic_stop);
 
+        // 让背景不显示
+        binding.ivNoMoreSong.setVisibility(View.GONE);
+
         //播放列表的初始化
         recyclerView = binding.rvPlayList;
         adapter = new PlayListAdapter(songList, new PlayListAdapter.Callback() {
@@ -107,18 +110,25 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void remove(int position) {
                 if(adapter!=null){
-                    adapter.notifyItemRemoved(position);
-                    songList.remove(position);
-                    PlayerService.list.remove(position);
-                    adapter.notifyItemRangeChanged(0,adapter.getItemCount());
-                    adapter.notifyDataSetChanged();
-                    if(position<PlayerService.position){
-                        PlayerService.position--;
-                    }else if(position==PlayerService.position){
-                        Picasso.with(PlayerActivity.this).load(songList.get(position).getAlbum().getPicUrl()+ ViewConstants.PARAM).placeholder(R.drawable.img_wait).error(R.drawable.img_404).into(binding.ivPicture);
-                        binding.tvSongName.setText(songList.get(position).getName());
-                        playerService.nextSong();
+                    if(songList.size()==1){
+                        binding.ivNoMoreSong.setVisibility(View.VISIBLE);
+                        songList.remove(position);
+                        PlayerService.list.remove(position);
+                    }else {
+                        adapter.notifyItemRemoved(position);
+                        songList.remove(position);
+                        PlayerService.list.remove(position);
+                        adapter.notifyItemRangeChanged(0,adapter.getItemCount());
+                        adapter.notifyDataSetChanged();
+                        if(position<PlayerService.position){
+                            PlayerService.position--;
+                        }else if(position==PlayerService.position){
+                            Picasso.with(PlayerActivity.this).load(songList.get(position).getAlbum().getPicUrl()+ ViewConstants.PARAM).placeholder(R.drawable.img_wait).error(R.drawable.img_404).into(binding.ivPicture);
+                            binding.tvSongName.setText(songList.get(position).getName());
+                            playerService.nextSong();
+                        }
                     }
+
                 }
 
             }
@@ -127,7 +137,7 @@ public class PlayerActivity extends AppCompatActivity {
             public void change(PlayListAdapter.CallbackPosition callbackPosition) {
 
             }
-        },PlayerService.position);
+        });
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setVisibility(View.GONE);
@@ -375,14 +385,20 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            if(recyclerView.getVisibility() == View.VISIBLE){
+            if(binding.ivNoMoreSong.getVisibility() == View.VISIBLE){
+                binding.ivNoMoreSong.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.GONE);
             }else {
-                isFirstInside = true;
-                unBind(isBind);
-                isBind = false;
-                finish();
+                if(recyclerView.getVisibility() == View.VISIBLE){
+                    recyclerView.setVisibility(View.GONE);
+                }else {
+                    isFirstInside = true;
+                    unBind(isBind);
+                    isBind = false;
+                    finish();
+                }
             }
+
         }
         return true;
     }

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.player.PlayerService;
 import com.example.player.R;
 import com.example.player.entity.Artist;
 import com.example.player.entity.Song;
@@ -20,11 +21,11 @@ import java.util.List;
 public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHolder> {
     private final List<Song> playList;
     private Callback callback;
-    private int outPosition;
-    public PlayListAdapter(List<Song> playList,Callback callback,int position) {
+
+    public PlayListAdapter(List<Song> playList,Callback callback) {
         this.playList = playList;
         this.callback = callback;
-        outPosition = position;
+
     }
 
     @NonNull
@@ -38,8 +39,10 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull PlayListAdapter.ViewHolder holder, int position) {
         holder.songName.setText(playList.get(position).getName());
-        if(position == outPosition){
+        if(position == PlayerService.position){
             holder.songName.setTextColor(Color.RED);
+        }else {
+            holder.songName.setTextColor(Color.GRAY);
         }
         StringBuffer artistName = new StringBuffer(" ");
         for (int i = 0; i < playList.get(position).getArtists().size(); i++) {
