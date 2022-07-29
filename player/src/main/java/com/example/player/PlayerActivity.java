@@ -5,6 +5,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
@@ -15,9 +16,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.example.player.adapter.PlayListAdapter;
 import com.example.player.databinding.ActivityPlayerBinding;
 import com.example.player.entity.Song;
 import com.example.player.util.HttpUtil;
@@ -48,6 +51,11 @@ public class PlayerActivity extends AppCompatActivity {
     public List<Song> songList;
     //随机数，用于随机播放的逻辑
     private Random random;
+    // 播放列表
+    private RecyclerView recyclerView;
+
+    // 播放列表适配器
+    private  PlayListAdapter adapter;
 
 
 
@@ -93,9 +101,36 @@ public class PlayerActivity extends AppCompatActivity {
         binding.ivStop.setImageResource(R.drawable.ic_stop);
 
         //播放列表的初始化
-        RecyclerView recyclerView = binding.rvPlayList;
+        recyclerView = binding.rvPlayList;
+        adapter = new PlayListAdapter(songList, new PlayListAdapter.Callback() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void remove(int position) {
+                if(adapter!=null){
+                    adapter.notifyItemRemoved(position);
+                    songList.remove(position);
+                    PlayerService.list.remove(position);
+                    adapter.notifyItemRangeChanged(0,adapter.getItemCount());
+                    adapter.notifyDataSetChanged();
+                    if(position<PlayerService.position){
+                        PlayerService.position--;
+                    }else if(position==PlayerService.position){
+                        Picasso.with(PlayerActivity.this).load(songList.get(position).getAlbum().getPicUrl()+ ViewConstants.PARAM).placeholder(R.drawable.img_wait).error(R.drawable.img_404).into(binding.ivPicture);
+                        binding.tvSongName.setText(songList.get(position).getName());
+                        playerService.nextSong();
+                    }
+                }
 
+            }
 
+            @Override
+            public void change(PlayListAdapter.CallbackPosition callbackPosition) {
+
+            }
+        },PlayerService.position);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setVisibility(View.GONE);
 
         // 对进度条位置的参数观察
         playerViewModel.currentPosition.observe(this, currentPosition -> {
@@ -169,7 +204,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         // 播放列表的显示逻辑
         binding.ivPlayList.setOnClickListener(v->{
-
+            recyclerView.setVisibility(View.VISIBLE);
         });
 
         //播放暂停键的点击逻辑
@@ -340,10 +375,14 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            isFirstInside = true;
-            unBind(isBind);
-            isBind = false;
-            finish();
+            if(recyclerView.getVisibility() == View.VISIBLE){
+                recyclerView.setVisibility(View.GONE);
+            }else {
+                isFirstInside = true;
+                unBind(isBind);
+                isBind = false;
+                finish();
+            }
         }
         return true;
     }

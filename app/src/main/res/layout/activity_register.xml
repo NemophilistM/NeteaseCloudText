@@ -104,7 +104,7 @@
             android:text="@string/to_register"
             android:textColor="@color/black"
             android:textSize="25sp"
-            android:background="@drawable/sytle_button"
+            android:background="@drawable/style_button"
             android:foreground="?android:attr/selectableItemBackground"
             android:layout_marginTop="50dp"
             android:id="@+id/bt_login"
