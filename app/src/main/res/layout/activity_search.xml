@@ -41,13 +41,14 @@
             android:layout_margin="20dp"
             android:layout_below="@+id/tv_hot_song_list_tips"
             android:background="@drawable/style_card_type"
-
+            android:id="@+id/layout_hotkey_list"
             android:padding="5dp">
             <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:indeterminate="true"/>
             <com.example.neteasecloudmusictext.widget.FlowLayoutWidget
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

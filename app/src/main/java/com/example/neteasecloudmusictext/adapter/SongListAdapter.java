@@ -56,49 +56,13 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderAction holder, int position) {
-//        if(holder instanceof  LoadingItemVH){
-//            requestData(mPagePosition,mPageSize);
-//        }else if(holder instanceof  NoMoreItemVH){
-//        } else {
-//            SongList songList = list.get(position);
-//            ImageView imageView  = ((SongListItem)holder).ivAlbumPic;
-//            Picasso.with(context).load(songList.getAlbum().getPicUrl()).into(imageView );
-//            StringBuffer artistName = new StringBuffer(" ");
-//            for (int i = 0; i < songList.getArtists().size(); i++) {
-//                Artist artist = songList.getArtists().get(i);
-//                String artName = artist.getName();
-//                artistName.append(artName).append(" ");
-//            }
-//            ((SongListItem)holder).tvAuthor.setText(artistName);
-//            ((SongListItem)holder).tvTitle.setText(songList.getName());
-//            ((SongListItem)holder).tvAlbumName.setText(songList.getAlbum().getName());
-//        }
-
         holder.takeAction(list, position);
     }
 
 
     @SuppressLint("NotifyDataSetChanged")
     public void requestData(Boolean hasMordData) {
-//        if (mOnLoad != null) {
-//            mOnLoad.load(pagePosition, pageSize, new ILoadCallback() {
-//                @SuppressLint("NotifyDataSetChanged")
-//                @Override
-//                public void onSuccess() {
-//                    notifyDataSetChanged();
-//                    hasMordData = true;
-//                }
-//
-//                @Override
-//                public void onFailure() {
-//                    hasMordData = false;
-//                }
-//            });
-//        }
         this.hasMordData = hasMordData;
-//        if (hasMordData) {
-//            notifyDataSetChanged();
-//        }
     }
 
     @Override
@@ -121,10 +85,6 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
 
     @SuppressLint("NotifyDataSetChanged")
     public void appendData(List<Song> dataSet) {
-//        if (dataSet != null && !dataSet.isEmpty()) {
-//            list.addAll(dataSet);
-//            notifyDataSetChanged();
-//        }
         if (dataSet != null && !dataSet.isEmpty()) {
             list = dataSet;
             notifyDataSetChanged();
@@ -173,7 +133,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
         @Override
         void takeAction(List<Song> songList, int position) {
             Song song = songList.get(position);
-            Picasso.with(itemView.getContext()).load(song.getAlbum().getPicUrl()+ViewConstants.PARAM+ViewConstants.PARAM_LIMIT).into(ivAlbumPic);
+            Picasso.with(itemView.getContext()).load(song.getAlbum().getPicUrl()+ViewConstants.PARAM+ViewConstants.PARAM_LIMIT).placeholder(R.drawable.img_wait).error(R.drawable.img_404).into(ivAlbumPic);
             StringBuffer artistName = new StringBuffer(" ");
             for (int i = 0; i < song.getArtists().size(); i++) {
                 Artist artist = song.getArtists().get(i);
@@ -186,27 +146,29 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
             itemView.setOnClickListener(v -> {
                 mCallbackEnter.play(songList,position);
             });
-//            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View v) {
-//                    currentSongList.add(song);
-//                    return true;
-//                }
-//            });
         }
 
     }
 
+    /**
+     * adapter通知fragment发送网络请求
+     */
     public interface OnLoad {
         void load();
     }
 
+    /**
+     * 用于fragment告知adapter请求是否成功
+     */
     public interface ILoadCallback {
         void onSuccess();
 
         void onFailure();
     }
 
+    /**
+     * 抽象类，包含一个抽象方法，是每个vh类都需要实现的，具体操作不同
+     */
     abstract static class ViewHolderAction extends RecyclerView.ViewHolder {
         public ViewHolderAction(@NonNull View itemView) {
             super(itemView);

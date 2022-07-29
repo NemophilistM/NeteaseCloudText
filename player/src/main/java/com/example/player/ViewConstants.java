@@ -7,8 +7,8 @@ public class ViewConstants {
     public static String NAME = "name";
     public static String URL = "url";
     public static String ID_SEARCH_PREFIX = " https://music.163.com/song/media/outer/url?id=";
-    public static String ID_DOWN_LOAD = "https://netease-cloud-music-api-4eodv9lwk-tangan91314.vercel.app/song/download/url";
-    public static String GET_SONG_URL = " https://netease-cloud-music-api-4eodv9lwk-tangan91314.vercel.app/song/url";
+    public static String ID_DOWN_LOAD = "https://netease-cloud-music-api-gan.vercel.app/song/download/url";
+    public static String GET_SONG_URL = " https://netease-cloud-music-api-gan.vercel.app/song/url";
     public static String ID_SEARCH_SUFFIX = ".mp3";
     public static String SONG_LIST = "songList";
     public static String TIMESTAMP = "timestamp";
@@ -81,8 +81,8 @@ public class ViewConstants {
     public static final String  SONG_NOTIFICATION_INTENT_KEY = "type";
     public static final int  LAST_SONG_NOTIFICATION_VALUE = 30001;
     public static final int  PAUSE_SONG_NOTIFICATION_VALUE = 30002;
-
     public static final int  NEXT_SONG_NOTIFICATION_VALUE = 30003;
+    public static final int  MAIN_ACTIVITY_VALUE = 30004;
 
     //播放逻辑
     public static final int  PLAY_REPEAT = 0;

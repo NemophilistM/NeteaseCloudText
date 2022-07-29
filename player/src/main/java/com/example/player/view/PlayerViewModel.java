@@ -16,8 +16,10 @@ public class PlayerViewModel extends ViewModel {
     public LiveData<Integer> duration =_duration ;
     private final MutableLiveData<Integer> _currentPosition = new MutableLiveData<>();
     public LiveData<Integer> currentPosition = _currentPosition;
-    private final MutableLiveData<String> _musicUrl = new MutableLiveData<>();
-    public LiveData<String> musicUrl =_musicUrl ;
+    private final MutableLiveData<Integer> _notificationPositionChange = new MutableLiveData<>();
+    public LiveData<Integer> notificationPositionChange =_notificationPositionChange ;
+    private final MutableLiveData<Boolean> _notificationPlayingChange = new MutableLiveData<>();
+    public LiveData<Boolean> notificationPlayingChange =_notificationPlayingChange ;
 
     public void play(PlayerService playerService, List<Song> list){
         playerService.communicate(new PlayerService.CallBack() {
@@ -35,24 +37,19 @@ public class PlayerViewModel extends ViewModel {
                     _duration.postValue(duration);
                     _currentPosition.postValue(currentPosition);
                 }
+            }
 
+            @Override
+            public void changeActivity(int position) {
+                _notificationPositionChange.postValue(position);
+            }
+
+            @Override
+            public void changePlayingStatus(boolean isPlaying) {
+                _notificationPlayingChange.postValue(isPlaying);
             }
         },list);
     }
 
-    public void getUrl (Long id){
-        PlayerModel playerModel = new PlayerModel();
-        playerModel.requestMusicUrl(id, new PlayerModel.Callback() {
-            @Override
-            public void getUrl(String url) {
-                _musicUrl.postValue(url);
-            }
-
-            @Override
-            public void dispatch() {
-
-            }
-        });
-    }
 
 }

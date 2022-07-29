@@ -14,6 +14,10 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
     </androidx.appcompat.widget.Toolbar>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/rv_play_list"/>
 <ImageView
     android:layout_width="match_parent"
     android:layout_height="500dp"
@@ -41,6 +45,16 @@
         android:layout_alignBottom="@+id/tv_song_name"
         android:layout_marginStart="15dp"
         android:id="@+id/iv_play_logic"
+        tools:ignore="ContentDescription" />
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_toStartOf="@+id/tv_song_name"
+        android:layout_alignBottom="@+id/tv_song_name"
+        android:layout_marginEnd="15dp"
+        android:id="@+id/iv_play_list"
+        android:background="@drawable/ic_play_list"
+        android:foreground="?attr/selectableItemBackground"
         tools:ignore="ContentDescription" />
     <SeekBar
         android:layout_width="match_parent"

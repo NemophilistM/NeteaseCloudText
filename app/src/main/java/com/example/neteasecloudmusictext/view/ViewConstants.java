@@ -1,7 +1,7 @@
 package com.example.neteasecloudmusictext.view;
 
 public class ViewConstants {
-    public static final String PREFIX_URL = "https://netease-cloud-music-api-4eodv9lwk-tangan91314.vercel.app/";
+    public static final String PREFIX_URL = "https://netease-cloud-music-api-gan.vercel.app/";
     public static final String REGISTER = "register/cellphone";
     public static final String CAPTCHA_SEND = "captcha/sent";
     public static final String CAPTCHA_CHECK = "captcha/verify";

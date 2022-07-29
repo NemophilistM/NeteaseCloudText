@@ -26,7 +26,6 @@ public class LoginModel {
         HttpUtil.getThreadPoolExecutor().execute(() -> {
             try {
                 Response response = HttpUtil.getOkHttpClient().newCall(request).execute();
-
                 String responseData= response.body().string();
                 if(!responseData.isEmpty()){
                     callBack.CallBackWhetherTrue(responseData);

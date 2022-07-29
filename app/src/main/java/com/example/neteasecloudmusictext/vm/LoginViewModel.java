@@ -33,7 +33,6 @@ public class LoginViewModel extends ViewModel implements LoginActivity.pastPhone
     public void pastCaptcha(String phone, String captcha) {
         LoginModel.requestCaptcha(captcha,phone,information -> {
             mutableLiveDataLoginWhetherTrue.postValue(information);
-
             liveDataLoginWhetherTrue = mutableLiveDataLoginWhetherTrue;
         });
     }

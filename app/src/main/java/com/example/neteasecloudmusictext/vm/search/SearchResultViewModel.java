@@ -11,17 +11,21 @@ import java.util.List;
 public class SearchResultViewModel extends ViewModel {
     private final MutableLiveData<List<Song>> _resultSongList = new MutableLiveData<>();
     public LiveData<List<Song>> resultSongList = _resultSongList ;
-    private final MutableLiveData<List<Song>> _resultAllSong = new MutableLiveData<>();
 
     public void requestResultSongList(String  postWords,int curPage){
         SearchResultModel.requestResultSongList(postWords,curPage,songs -> {
-            List<Song> list = _resultSongList.getValue();
-            if(list!=null){
-                list.addAll(songs);
-                _resultSongList.postValue(list);
+            if(songs!= null ){
+                List<Song> list = _resultSongList.getValue();
+                if(list!=null){
+                    list.addAll(songs);
+                    _resultSongList.postValue(list);
+                }else {
+                    _resultSongList.postValue(songs);
+                }
             }else {
-                _resultSongList.postValue(songs);
+
             }
+
 
 
         });

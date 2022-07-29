@@ -67,16 +67,14 @@ public class SearchResultFragment extends Fragment {
             intent.putExtra(ViewConstants.POSITION, position);
             intent.putExtra(ViewConstants.SONG_LIST, bundle);
             startActivity(intent);
-
         });
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
-        viewModel.resultSongList.observe(requireActivity(), resultSongList -> {
+        viewModel.resultSongList.observe(this.getViewLifecycleOwner(), resultSongList -> {
             if (resultSongList.size()==(curPage-1)*ViewConstants.REQUEST_PAGE_MAX) {
                 adapter.requestData(true);
             } else {
                 adapter.requestData(false);
-
             }
             adapter.appendData(resultSongList);
         });

@@ -19,7 +19,9 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
@@ -61,18 +63,21 @@ public class PlayerService extends Service implements GetPositionAndDuration {
     public static int position = 0;
     // 用于网络请求的model层
     private PlayerModel playerModel;
-    // 记录不同PendingIntent的版本号
-    private int versionPendingIntent = 0;
     //播放逻辑
     public static int play_logic = ViewConstants.PLAY_REPEAT;
+    // 判断activity是否存活
+    public static boolean isLive = false;
 
     //两个存储随机数的集合，用于保存记录
     public static List<Integer> previousRandomList = new ArrayList<>();
     public static List<Integer> nextRandomList = new ArrayList<>();
-//    private LocalBroadcastManager localBroadcastManager;
     private MusicReceive musicReceive;
-    private IntentFilter intentFilter;
     private Random random;
+
+    // 存储随机数的集合
+    public static   List<Integer> randomList = new ArrayList<>();
+
+    public static int randomListPosition = 0;
 
 
 
@@ -88,16 +93,14 @@ public class PlayerService extends Service implements GetPositionAndDuration {
         playerModel = new PlayerModel();
 
         //广播管理器和广播的设置
-//        localBroadcastManager = LocalBroadcastManager.getInstance(this);
         musicReceive = new MusicReceive();
-        intentFilter = new IntentFilter();
+        IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ViewConstants.MAIN_ACTIVITY_ACTION);
         intentFilter.addAction(ViewConstants.PAUSE_SONG_NOTIFICATION_ACTION);
         intentFilter.addAction(ViewConstants.LAST_SONG_NOTIFICATION_ACTION);
         intentFilter.addAction(ViewConstants.NEXT_SONG_NOTIFICATION_ACTION);
-        registerReceiver(musicReceive,intentFilter);
-//        intentFilter.addAction(ViewConstants.ACTION_NOTIFICATION);
-//        localBroadcastManager.registerReceiver(musicReceive, intentFilter);
+        registerReceiver(musicReceive, intentFilter);
+
         // 播放器的监听方法，判断是否准备完毕，准备完毕会调用前面的回调方法对view层进行通知
         player.setOnPreparedListener(mp -> {
             player = mp;
@@ -128,7 +131,7 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                         player.setOnErrorListener((mp, what, extra) -> {
                             return true;
                         });
-                        player.setOnCompletionListener(mp -> {
+                        player.setOnCompletionListener(mp ->{
                             callBack.changeData(-1, -1);
                         });
                         break;
@@ -183,7 +186,7 @@ public class PlayerService extends Service implements GetPositionAndDuration {
      */
     public void communicate(CallBack callBack, List<Song> list) {
         this.callBack = callBack;
-        this.list = list;
+        PlayerService.list = list;
     }
 
     /**
@@ -209,8 +212,11 @@ public class PlayerService extends Service implements GetPositionAndDuration {
         remoteViews.setImageViewResource(R.id.iv_pause_notification, R.drawable.ic_stop);
 
         // 跳转活动
-        Intent intent = new Intent(this,PlayerActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, versionPendingIntent, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        Intent intent = new Intent(this,PlayerActivity.class);
+        Intent intent = new Intent(ViewConstants.MAIN_ACTIVITY_ACTION);
+        // 记录不同PendingIntent的版本号
+        int versionPendingIntent = 0;
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, versionPendingIntent, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.iv_pic_album,pendingIntent);
         // 暂停播放操作
         Intent intentPause = new Intent(ViewConstants.PAUSE_SONG_NOTIFICATION_ACTION);
@@ -250,7 +256,6 @@ public class PlayerService extends Service implements GetPositionAndDuration {
      * 创建通知渠道
      */
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = ViewConstants.ORDINARY_NAME_NOTIFICATION;
             String description = ViewConstants.ORDINARY_DESCRIPTION_NOTIFICATION;
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -260,7 +265,7 @@ public class PlayerService extends Service implements GetPositionAndDuration {
             if (notificationManager.getNotificationChannel(ViewConstants.ORDINARY_NOTIFICATION) == null) {
                 notificationManager.createNotificationChannel(channel);
             }
-        }
+
     }
 
     @Override
@@ -287,12 +292,17 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                         if(player.isPlaying()){
                             pausePlay();
                             remoteViews.setImageViewResource(R.id.iv_pause_notification,R.drawable.ic_stop);
-                            notificationManager.notify(ViewConstants.ID_ORDINARY_NOTIFICATION,notification);
+                            if(callBack!=null){
+                                callBack.changePlayingStatus(false);
+                            }
                         }else {
                             continuePlay();
                             remoteViews.setImageViewResource(R.id.iv_pause_notification,R.drawable.ic_continue);
-                            notificationManager.notify(ViewConstants.ID_ORDINARY_NOTIFICATION,notification);
+                            if(callBack!=null){
+                                callBack.changePlayingStatus(true);
+                            }
                         }
+                        notificationManager.notify(ViewConstants.ID_ORDINARY_NOTIFICATION,notification);
                     }
                     break;
                 case ViewConstants.NEXT_SONG_NOTIFICATION_ACTION:
@@ -303,11 +313,12 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                     // 播放逻辑：顺序，单曲循环(这二者点击下一首都会跳转到列表下一首)
                     if (play_logic == ViewConstants.PLAY_REPEAT || play_logic == ViewConstants.PLAY_REPEAT_ONCE) {
                         //判断是否为最后一首
-                        if (PlayerService.position <= (list.size() - 1)) {
-                            nextSong();
-                        }else {
+                        if (PlayerService.position == (list.size() - 1)) {
                             position = 0;
-                            nextSong();
+                        }
+                        nextSong();
+                        if(callBack!=null){
+                            callBack.changeActivity(position);
                         }
                     }
                     // 播放逻辑：随机播放
@@ -315,15 +326,17 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                         if (random == null) {
                             random = new Random();
                         }
-                        // 判断此时的下一首随机播放存储列表是否为空(为空就代表不是先点击了上一首随机播放)
-                        if (PlayerService.nextRandomList.size() <= 1) {
-                            PlayerService.position = random.nextInt(list.size());
-                            PlayerService.previousRandomList.add(PlayerService.position);
+                        if(randomList!=null){
+                            if(randomListPosition == randomList.size()-1){
+                                randomListPosition = 0;
+                            }else {
+                                randomListPosition++;
+                            }
+                            position = randomList.get(randomListPosition);
                             nextSong();
-                        } else {
-                            PlayerService.position = PlayerService.nextRandomList.get(PlayerService.nextRandomList.size() - 1);
-                            PlayerService.nextRandomList.remove(PlayerService.nextRandomList.size() - 1);
-                            nextSong();
+                        }
+                        if(callBack!=null){
+                            callBack.changeActivity(position);
                         }
                     }
                     break;
@@ -334,11 +347,12 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                     int play_logic2 = PlayerService.play_logic;
                     // 播放逻辑：顺序，单曲循环
                     if (play_logic2 == ViewConstants.PLAY_REPEAT || play_logic2 == ViewConstants.PLAY_REPEAT_ONCE) {
-                        if (PlayerService.position >= 0) {
-                            nextSong();
-                        } else {
+                        if (PlayerService.position == 0) {
                             PlayerService.position = (list.size() - 1);
-                            nextSong();
+                        }
+                        nextSong();
+                        if(callBack!=null){
+                            callBack.changeActivity(position);
                         }
                     }
                     // 播放逻辑：随机播放
@@ -346,21 +360,32 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                         if (random == null) {
                             random = new Random();
                         }
-                        // 判断此时的上一首随机播放存储列表是否为空
-                        if (PlayerService.previousRandomList.size() <= 1) {
-                            PlayerService.position = random.nextInt(list.size());
+                        if(randomList!=null){
+                            if(randomListPosition==0){
+                                randomListPosition =randomList.size()-1;
+                            }else {
+                                randomListPosition--;
+                            }
+                            position = randomList.get(randomListPosition);
                             nextSong();
-                            PlayerService.nextRandomList.add(PlayerService.position);
-                        } else {
-                            PlayerService.position = PlayerService.previousRandomList.get(PlayerService.previousRandomList.size() - 1);
-                            PlayerService.previousRandomList.remove(PlayerService.previousRandomList.size() - 1);
-                            nextSong();
+                        }
+                        if(callBack!=null){
+                            callBack.changeActivity(position);
                         }
                     }
                     break;
                 case ViewConstants.CLEAR_FOREGROUND_NOTIFICATION_ACTION:
                     stopForeground(true);
                     break;
+                case ViewConstants.MAIN_ACTIVITY_ACTION:
+                    if(isLive){
+                        Toast.makeText(PlayerService.this.getApplicationContext(),"该页面正在显示",Toast.LENGTH_SHORT).show();
+                    }else {
+                        Intent intent1 = new Intent(PlayerService.this,PlayerActivity.class);
+                        intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent1);
+                    }
+
             }
         }
     }
@@ -376,6 +401,7 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                 if (url.equals(ViewConstants.NULL)) {
                     url = ViewConstants.ID_SEARCH_PREFIX + list.get(position).getId();
                     Log.e(ViewConstants.TAG, "onCreate: 该歌曲为null");
+                    Log.d(ViewConstants.TAG, "getUrl: "+Thread.currentThread().getName());
                 }
                 Message message = Message.obtain();
                 message.what = ViewConstants.PREPARED;
@@ -449,6 +475,7 @@ public class PlayerService extends Service implements GetPositionAndDuration {
         public PlayerService getService() {
             return PlayerService.this;
         }
+
     }
 
     /**
@@ -490,7 +517,10 @@ public class PlayerService extends Service implements GetPositionAndDuration {
         position = 0;
         // 注销广播接收期
         unregisterReceiver(musicReceive);
-//        stopForeground();
+        //初始化随机数表
+        randomListPosition = 0;
+        randomList = new ArrayList<>();
+
     }
 
     /**
@@ -500,6 +530,10 @@ public class PlayerService extends Service implements GetPositionAndDuration {
         void prepared();
 
         void changeData(int duration, int currentPosition);
+
+        void changeActivity(int position );
+
+        void changePlayingStatus(boolean isPlaying);
     }
 
 

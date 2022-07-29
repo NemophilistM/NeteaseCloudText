@@ -26,7 +26,7 @@ public class MyselfFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding= FragmentMyselfBinding.inflate(inflater,container,false);
         binding.tvGetSelfList.setOnClickListener(v->{
-                Intent intent = new Intent(getActivity(),MyselfSongListActivity.class);
+                Intent intent = new Intent(this.getContext(),MyselfSongListActivity.class);
                 startActivity(intent);
         });
         return binding.getRoot();

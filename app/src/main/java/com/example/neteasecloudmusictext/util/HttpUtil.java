@@ -25,7 +25,6 @@ public class HttpUtil {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             client =  builder.cookieJar(new CookieJarManager())
                     .build();
-
         }
         return client;
 

@@ -15,8 +15,6 @@ import java.util.List;
 public class Formatter {
     public static List<Song> songLists(String json){
         int code = 0;
-//        int size = curPage* ViewConstants.PAGE_MAX;
-//        int limit  = size+20;
         List<Song> songList = new ArrayList<>();
         try {
             JSONObject root = new JSONObject(json);
