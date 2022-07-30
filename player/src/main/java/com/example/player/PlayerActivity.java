@@ -318,9 +318,13 @@ public class PlayerActivity extends AppCompatActivity {
         binding.ivPlayLogic.setOnClickListener(v -> {
             if (PlayerService.play_logic == ViewConstants.PLAY_REPEAT) {
                 PlayerService.play_logic = ViewConstants.PLAY_REPEAT_ONCE;
+//                //设置player为looping
+//                playerService.playRepeatOnce(true);
                 binding.ivPlayLogic.setImageResource(R.drawable.ic_player_repeatonce);
             } else if (PlayerService.play_logic == ViewConstants.PLAY_REPEAT_ONCE) {
                 PlayerService.play_logic = ViewConstants.PLAY_SHUFFLE;
+//                // 设置player为非looping
+//                playerService.playRepeatOnce(false);
                 if(random == null){
                     random = new Random();
                 }

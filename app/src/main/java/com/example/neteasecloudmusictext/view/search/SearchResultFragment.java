@@ -2,6 +2,7 @@ package com.example.neteasecloudmusictext.view.search;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.neteasecloudmusictext.R;
 import com.example.neteasecloudmusictext.adapter.SongListAdapter;
 import com.example.neteasecloudmusictext.base.CallbackEnter;
 import com.example.neteasecloudmusictext.databinding.FragmentSearchResultBinding;
@@ -58,7 +60,7 @@ public class SearchResultFragment extends Fragment {
         RecyclerView recyclerView = binding.rvSongList;
         //初始化适配器
         adapter = new SongListAdapter(() -> {
-            viewModel.requestResultSongList(postWords, curPage);
+            viewModel.requestResultSongList(postWords, curPage,binding.srSearch.isRefreshing());
             curPage++;
         }, (songList, position) -> {
             Bundle bundle = new Bundle();
@@ -71,13 +73,22 @@ public class SearchResultFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
         viewModel.resultSongList.observe(this.getViewLifecycleOwner(), resultSongList -> {
-            if (resultSongList.size()==(curPage-1)*ViewConstants.REQUEST_PAGE_MAX) {
-                adapter.requestData(true);
-            } else {
-                adapter.requestData(false);
+
+            if(binding.srSearch.isRefreshing()){
+                binding.srSearch.setRefreshing(false);
             }
+            adapter.requestData(resultSongList.size() == (curPage - 1) * ViewConstants.REQUEST_PAGE_MAX);
             adapter.appendData(resultSongList);
         });
+
+        binding.srSearch.setColorSchemeColors(Color.parseColor("#00FF80"),Color.parseColor("#CEF6D8"));
+        binding.srSearch.setOnRefreshListener(()->{
+            curPage = 1;
+            viewModel.requestResultSongList(postWords,curPage,true);
+            curPage++;
+
+        });
+
         return binding.getRoot();
     }
 

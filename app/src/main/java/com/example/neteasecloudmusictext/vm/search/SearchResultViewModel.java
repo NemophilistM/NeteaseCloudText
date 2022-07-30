@@ -12,16 +12,21 @@ public class SearchResultViewModel extends ViewModel {
     private final MutableLiveData<List<Song>> _resultSongList = new MutableLiveData<>();
     public LiveData<List<Song>> resultSongList = _resultSongList ;
 
-    public void requestResultSongList(String  postWords,int curPage){
+    public void requestResultSongList(String  postWords,int curPage,boolean isRefresh){
         SearchResultModel.requestResultSongList(postWords,curPage,songs -> {
             if(songs!= null ){
-                List<Song> list = _resultSongList.getValue();
-                if(list!=null){
-                    list.addAll(songs);
-                    _resultSongList.postValue(list);
-                }else {
+                if(isRefresh){
                     _resultSongList.postValue(songs);
+                }else {
+                    List<Song> list = _resultSongList.getValue();
+                    if(list!=null){
+                        list.addAll(songs);
+                        _resultSongList.postValue(list);
+                    }else {
+                        _resultSongList.postValue(songs);
+                    }
                 }
+                
             }else {
 
             }

@@ -171,6 +171,10 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                             e.printStackTrace();
                         }
                         break;
+                    case ViewConstants.SET_PLAY_REPEAT_ONCE:
+                        boolean isLooping = (boolean) msg.obj;
+                        player.setLooping(isLooping);
+                        break;
                 }
 
 
@@ -471,6 +475,18 @@ public class PlayerService extends Service implements GetPositionAndDuration {
             }
         });
 
+    }
+
+
+    public void playRepeatOnce(boolean isLooping){
+        Message message  = Message.obtain();
+        message.what = ViewConstants.SET_PLAY_REPEAT_ONCE;
+        if(isLooping){
+            message.obj = true;
+        }else {
+            message.obj = false;
+        }
+        handler.sendMessage(message);
     }
     /**
      * 服务类返回的binder，进行歌曲操作

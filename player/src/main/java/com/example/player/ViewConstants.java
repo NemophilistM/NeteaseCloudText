@@ -55,6 +55,10 @@ public class ViewConstants {
      */
     public static final int NEXT_SONG = 7;
     public static final int NO_SONG = 8;
+    /**
+     * 设置重复播放
+     */
+    public static final int SET_PLAY_REPEAT_ONCE = 9;
 
 
     //json
