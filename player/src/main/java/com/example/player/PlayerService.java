@@ -306,8 +306,7 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                     }
                     break;
                 case ViewConstants.NEXT_SONG_NOTIFICATION_ACTION:
-                    // 首先将当前列表位置加一
-                    position++;
+
                     // 获取播放逻辑进行判断
                     int play_logic = PlayerService.play_logic;
                     // 播放逻辑：顺序，单曲循环(这二者点击下一首都会跳转到列表下一首)
@@ -315,6 +314,9 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                         //判断是否为最后一首
                         if (PlayerService.position == (list.size() - 1)) {
                             position = 0;
+                        }else {
+                            // 将当前列表位置加一
+                            position++;
                         }
                         nextSong();
                         if(callBack!=null){
@@ -341,14 +343,16 @@ public class PlayerService extends Service implements GetPositionAndDuration {
                     }
                     break;
                 case ViewConstants.LAST_SONG_NOTIFICATION_ACTION:
-                    //先让当前位置自减1
-                    position--;
+
                     // 判断播放逻辑
                     int play_logic2 = PlayerService.play_logic;
                     // 播放逻辑：顺序，单曲循环
                     if (play_logic2 == ViewConstants.PLAY_REPEAT || play_logic2 == ViewConstants.PLAY_REPEAT_ONCE) {
                         if (PlayerService.position == 0) {
                             PlayerService.position = (list.size() - 1);
+                        }else {
+                            //让当前位置自减1
+                            position--;
                         }
                         nextSong();
                         if(callBack!=null){

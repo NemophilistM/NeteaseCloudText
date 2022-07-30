@@ -28,6 +28,7 @@
         android:background="@drawable/style_button"
         android:text="@string/remove"
         android:textColor="@color/black"
+        android:foreground="?attr/selectableItemBackground"
         android:id="@+id/bt_remove_play_list"
         tools:ignore="RelativeOverlap" />
     <View

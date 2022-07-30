@@ -20,7 +20,7 @@ import java.util.List;
 
 public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHolder> {
     private final List<Song> playList;
-    private Callback callback;
+    private final Callback callback;
 
     public PlayListAdapter(List<Song> playList,Callback callback) {
         this.playList = playList;
@@ -37,9 +37,9 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
-    public void onBindViewHolder(@NonNull PlayListAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull PlayListAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         holder.songName.setText(playList.get(position).getName());
-        if(position == PlayerService.position){
+        if(PlayerService.position == position){
             holder.songName.setTextColor(Color.RED);
         }else {
             holder.songName.setTextColor(Color.GRAY);

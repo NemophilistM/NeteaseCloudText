@@ -49,7 +49,7 @@ public class PlayerActivity extends AppCompatActivity {
     //    //静态类，用于记录页数
 //    private   int PlayerService.position = 0;
     //歌曲列表，从跳转activity获取
-    public List<Song> songList;
+    private List<Song> songList;
     //随机数，用于随机播放的逻辑
     private Random random;
     // 播放列表
@@ -114,10 +114,15 @@ public class PlayerActivity extends AppCompatActivity {
                     if(songList.size()==1){
                         Toast.makeText(PlayerActivity.this,"该曲目未列表的最后一首，无法移除",Toast.LENGTH_SHORT).show();
                     }else {
+                        if(random == null){
+                            random = new Random();
+                        }
                         adapter.notifyItemRemoved(position);
+
                         songList.remove(position);
-                        PlayerService.list.remove(position);
-                        if(PlayerService.randomList!=null){
+//                        PlayerService.list.remove(position);
+                        PlayerService.list.get(position);
+                        if(PlayerService.randomList.size()!=0){
                             PlayerService.randomList.add(PlayerService.position);
                             while (PlayerService.randomList.size() < songList.size()) {
                                 int random1 = random.nextInt(songList.size());
@@ -126,8 +131,6 @@ public class PlayerActivity extends AppCompatActivity {
                                 }
                             }
                         }
-                        adapter.notifyItemRangeChanged(0,adapter.getItemCount());
-                        adapter.notifyDataSetChanged();
                         if(position<PlayerService.position){
                             PlayerService.position--;
                         }else if(position==PlayerService.position){
@@ -135,6 +138,8 @@ public class PlayerActivity extends AppCompatActivity {
                             binding.tvSongName.setText(songList.get(position).getName());
                             playerService.nextSong();
                         }
+                        adapter.notifyItemRangeChanged(0,adapter.getItemCount());
+                        adapter.notifyDataSetChanged();
                     }
 
                 }
@@ -246,8 +251,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         //下一首的点击逻辑
         binding.ivNextSong.setOnClickListener(v -> {
-            // 首先将当前列表位置加一
-            PlayerService.position++;
+
             // 获取播放逻辑进行判断
             int play_logic = PlayerService.play_logic;
             // 播放逻辑：顺序，单曲循环(这二者点击下一首都会跳转到列表下一首)
@@ -255,6 +259,9 @@ public class PlayerActivity extends AppCompatActivity {
                 //判断是否为最后一首
                 if (PlayerService.position == (songList.size() - 1)) {
                     PlayerService.position = 0;
+                }else {
+                    // 将当前列表位置加一
+                    PlayerService.position++;
                 }
                 judgeSongStatus();
 
@@ -277,14 +284,16 @@ public class PlayerActivity extends AppCompatActivity {
 
         // 上一首的点击逻辑
         binding.ivLastSong.setOnClickListener(v -> {
-            //先让当前位置自减1
-            PlayerService.position--;
+
             // 判断播放逻辑
             int play_logic = PlayerService.play_logic;
             // 播放逻辑：顺序，单曲循环
             if (play_logic == ViewConstants.PLAY_REPEAT || play_logic == ViewConstants.PLAY_REPEAT_ONCE) {
                 if (PlayerService.position == 0) {
                     PlayerService.position = (songList.size() - 1);
+                }else {
+                    //让当前位置自减1
+                    PlayerService.position--;
                 }
                 judgeSongStatus();
 
@@ -448,5 +457,6 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         PlayerService.isLive  = false;
+        songList = null;
     }
 }
